@@ -1,5 +1,5 @@
 
-#%%
+#%%  - these are the importers
 import streamlit as st
 import chromadb
 from pprint import pprint
@@ -7,7 +7,7 @@ from chromadb.config import Settings
 import re
 
 
-#%% 
+#%% - this is a path
 dbpath = "b:\\python\\holy-vec\\database\\holy_db" # set the path to the DB
 
 if 'col_choice' not in st.session_state:  #initialize selection of a collection
