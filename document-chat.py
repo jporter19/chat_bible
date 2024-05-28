@@ -8,7 +8,7 @@ import re
 
 
 #%% - this is a path
-dbpath = "b:\\python\\holy-vec\\database\\holy_db" # set the path to the DB
+dbpath = "b:\\python\\database\\bible" # set the path to the DB
 
 if 'col_choice' not in st.session_state:  #initialize selection of a collection
     st.session_state['col_choice']=None
