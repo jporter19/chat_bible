@@ -1,17 +1,16 @@
 
 #%%  - these are the importers 
-import streamlit as st
-import chromadb
-from pprint import pprint
+import streamlit as st  # Streamlit is a package used for simple websites
+import chromadb         # Chroma Db is an open source vector database
+from pprint import pprint  # pprint is a bit better than print
 from chromadb.config import Settings
-import re
+import re    # re is regular expressions for pattern matching
 
-# testing comment
-#%% - this is a path
-dbpath = "b:\\python\\database\\bible" # set the path to the DB
+#%% - this is a path to the primary database, each database can have multiple collections
+dbpath = "b:\\python\\database\\IPCC" # set the path to the DB
 
 if 'col_choice' not in st.session_state:  #initialize selection of a collection
-    st.session_state['col_choice']=None
+    st.session_state['col_choice']=None   # This could be set a default
 
 #%%
 # This function will produce a distinct list of collection to be displayed in drop down
@@ -25,12 +24,9 @@ def my_collections(db):
 chroma_db = chromadb.PersistentClient(path=dbpath)  # open a persistent database
 st.session_state.col_choice = st.sidebar.selectbox("Pick a Collection",my_collections(chroma_db))
 if st.session_state.col_choice:
-    # st.write(col_choice)
-    chroma_collection = chroma_db.get_collection(st.session_state.col_choice)
+    chroma_collection = chroma_db.get_collection(st.session_state.col_choice) # st.write(col_choice)
 resp_cnt = st.sidebar.slider(min_value=1,max_value=10,label="Set the Number of Response")
-
-
-
+st.write(chroma_collection.count())
 # chroma_collection = chroma_db.get_collection(col_nm)  # Create a collection
 # pprint(chroma_db.list_collections()) # print all collections in database
 # ***** chroma_db.delete_collection("bluemetal")
@@ -53,31 +49,40 @@ def closest_index(dists, val):
 #%%  --------------- Main Program  -------------------------------
 if 'prompt_res' not in st.session_state:
     st.session_state['prompt_res']=dict()
-# ------------- Display results in a container  ------------------
-with st.container():  # using a container pushes the input to the top of the page
-    st.subheader(f'Collection: [{st.session_state.col_choice}]',divider=True)
-    prompt=(st.chat_input('What is your question?'))
-    if prompt: # if prompt has data then run this
-        res = chroma_collection.query(query_texts=prompt, 
-            n_results=18,
-            include=["distances","documents","embeddings","metadatas"])
-        docs = closest_index(res["distances"][0],resp_cnt)
-        best_docs = ''
-        for d in docs:
-             best_docs = best_docs + res["documents"][0][d] +  f'  \n :blue[Source:] *{res["metadatas"][0][d].get('source')}*' +'\n\n'
-            # best_docs = best_docs + res["documents"][0][d] +  '  '  + 'www.newadvent.org'
-            
-        # st.write(best_docs)
-        prompt = prompt + ' -- Collection  \{'+st.session_state.col_choice+'\}'
-        #st.session_state.prompt_res.update({prompt:best_docs[0]})
-        st.session_state.prompt_res.update({prompt:best_docs})
-        response = st.container(height=600)
-        with response:
-            for key in st.session_state.prompt_res:
-                message = st.chat_message('user')
-                message.write(key)
-                mycont=st.container(height=250, border=True)
-                with mycont: st.write(st.session_state.prompt_res[key])
-    
+
+# Setup tabs 
+tab1, tab2 = st.tabs(["Query","Admin"]) 
+
+with tab1:
+    # ------------- Display results in a container  ------------------
+    with st.container():  # using a container pushes the input to the top of the page
+        st.subheader(f'Collection: [{st.session_state.col_choice}]',divider=True)
+        prompt=(st.chat_input('What is your question?'))
+        if prompt: # if prompt has data then run this
+            ##%%
+
+            res = chroma_collection.query(query_texts=prompt, 
+                n_results=18,
+                include=["distances","documents","embeddings","metadatas"])
+            docs = closest_index(res["distances"][0],resp_cnt)
+            best_docs = ''
+            for d in docs:
+                best_docs = best_docs + res["documents"][0][d] +  f'  \n :blue[Source:] *{res["metadatas"][0][d].get('source')}*' +'\n\n'
+                # best_docs = best_docs + res["documents"][0][d] +  '  '  + 'www.newadvent.org'
+                
+            # st.write(best_docs)
+            prompt = prompt + ' -- Collection  \{'+st.session_state.col_choice+'\}'
+            #st.session_state.prompt_res.update({prompt:best_docs[0]})
+            st.session_state.prompt_res.update({prompt:best_docs})
+            response = st.container(height=600)
+            with response:
+                for key in st.session_state.prompt_res:
+                    message = st.chat_message('user')
+                    message.write(key)
+                    mycont=st.container(height=250, border=True)
+                    with mycont: st.write(st.session_state.prompt_res[key])
+        
 
 
+
+# %%
