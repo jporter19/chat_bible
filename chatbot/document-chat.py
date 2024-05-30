@@ -2,13 +2,18 @@
 #%%  - these are the importers 
 import streamlit as st  # Streamlit is a package used for simple websites
 import chromadb         # Chroma Db is an open source vector database
+from langchain_chroma import Chroma
 from pprint import pprint  # pprint is a bit better than print
 from chromadb.config import Settings
+from chromadb.utils import embedding_functions
 import re    # re is regular expressions for pattern matching
+#default_ef = embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+
+default_ef = embedding_functions.DefaultEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+
 
 #%% - this is a path to the primary database, each database can have multiple collections
 dbpath = "b:\\python\\database\\IPCC" # set the path to the DB
-
 if 'col_choice' not in st.session_state:  #initialize selection of a collection
     st.session_state['col_choice']=None   # This could be set a default
 
@@ -21,12 +26,15 @@ def my_collections(db):
     return collections
 
 #%%
-chroma_db = chromadb.PersistentClient(path=dbpath)  # open a persistent database
-st.session_state.col_choice = st.sidebar.selectbox("Pick a Collection",my_collections(chroma_db))
+db_client = Chroma()
+collection = Chroma(collection_name="IPCC",  embedding_function=embedding_function, persist_directory=dbpath,)
+chroma_client = chromadb.PersistentClient(path=dbpath)  # open a persistent database
+st.session_state.col_choice = st.sidebar.selectbox("Pick a Collection",my_collections(chroma_client))
 if st.session_state.col_choice:
-    chroma_collection = chroma_db.get_collection(st.session_state.col_choice) # st.write(col_choice)
+    collection = chroma_client.get_collection(st.session_state.col_choice) # st.write(col_choice)
 resp_cnt = st.sidebar.slider(min_value=1,max_value=10,label="Set the Number of Response")
-st.write(chroma_collection.count())
+langchain_chroma = Chroma(client=chroma_client,collection_name=st.session_state.col_choice,embedding_function=default_ef,)
+# st.write(lc_client._collection.count())
 # chroma_collection = chroma_db.get_collection(col_nm)  # Create a collection
 # pprint(chroma_db.list_collections()) # print all collections in database
 # ***** chroma_db.delete_collection("bluemetal")
@@ -60,20 +68,22 @@ with tab1:
         prompt=(st.chat_input('What is your question?'))
         if prompt: # if prompt has data then run this
             ##%%
-
-            res = chroma_collection.query(query_texts=prompt, 
-                n_results=18,
-                include=["distances","documents","embeddings","metadatas"])
-            docs = closest_index(res["distances"][0],resp_cnt)
-            best_docs = ''
-            for d in docs:
-                best_docs = best_docs + res["documents"][0][d] +  f'  \n :blue[Source:] *{res["metadatas"][0][d].get('source')}*' +'\n\n'
+            st.write(prompt)
+            res = langchain_chroma.similarity_search(prompt)
+            st.write(res)
+           # res = chroma_collection.query(query_texts=prompt, 
+           #     n_results=18,
+           #     include=["distances","documents","embeddings","metadatas"])
+            #docs = closest_index(res["distances"][0],resp_cnt)
+            #best_docs = ''
+            #for d in docs:
+            #    best_docs = best_docs + res["documents"][0][d] +  f'  \n :blue[Source:] *{res["metadatas"][0][d].get('source')}*' +'\n\n'
                 # best_docs = best_docs + res["documents"][0][d] +  '  '  + 'www.newadvent.org'
                 
             # st.write(best_docs)
             prompt = prompt + ' -- Collection  \{'+st.session_state.col_choice+'\}'
             #st.session_state.prompt_res.update({prompt:best_docs[0]})
-            st.session_state.prompt_res.update({prompt:best_docs})
+            #st.session_state.prompt_res.update({prompt:best_docs})
             response = st.container(height=600)
             with response:
                 for key in st.session_state.prompt_res:
