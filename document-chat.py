@@ -1,12 +1,12 @@
 
-#%%  - these are the importers
+#%%  - these are the importers 
 import streamlit as st
 import chromadb
 from pprint import pprint
 from chromadb.config import Settings
 import re
 
-
+# testing comment
 #%% - this is a path
 dbpath = "b:\\python\\database\\bible" # set the path to the DB
 
