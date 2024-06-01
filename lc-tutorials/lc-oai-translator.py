@@ -37,9 +37,8 @@ chain = prompt_template | model | parser
 chain.invoke({"language": "italian", "text": "hi"})
 
 # %%-------------------- Remote Runnable --------------------------------
+# THIS WILL NOT WORK!! unless server.py is running from the command line
 from langserve import RemoteRunnable
-
 remote_chain = RemoteRunnable("http://localhost:8000/chain/")
 remote_chain.invoke({"language": "spanish", "text": "what time is it"})
 
-# %%
