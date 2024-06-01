@@ -1,9 +1,10 @@
 #%% --------- pip install --upgrade --quiet  lark langchain-chroma
 
-from langchain_chroma import Chroma
-from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
+from langchain_chroma import Chroma  # Chroma DB
+from langchain_core.documents import Document 
+from langchain_openai import OpenAIEmbeddings # Open AI embeddings
 
+# Setup some documents to support the tutorial
 docs = [
     Document(
         page_content="A bunch of scientists bring back dinosaurs and mayhem breaks loose",
@@ -35,9 +36,10 @@ docs = [
         },
     ),
 ]
-vectorstore = Chroma.from_documents(docs, OpenAIEmbeddings())
+# create an instance of a chroma collection 
+vectorstore = Chroma.from_documents(collection_name="boo", docs, OpenAIEmbeddings()) # Create a Chroma vectorstore from a list of documents
 
-
+#%%
 from langchain.chains.query_constructor.base import AttributeInfo
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_openai import ChatOpenAI

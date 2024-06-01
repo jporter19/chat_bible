@@ -1,9 +1,6 @@
 #%%
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
-from chromadb.utils import embedding_functions
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter, SentenceTransformersTokenTextSplitter
 embeddings_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 from langchain_core.documents import Document
@@ -39,4 +36,3 @@ vectorstore = Chroma.from_documents(
 await vectorstore.asimilarity_search("cat")
 #  vectorstore.delete_collection()
 
-# %%
