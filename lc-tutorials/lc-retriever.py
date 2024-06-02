@@ -37,7 +37,7 @@ docs = [
     ),
 ]
 # create an instance of a chroma collection 
-vectorstore = Chroma.from_documents(collection_name="boo", docs, OpenAIEmbeddings()) # Create a Chroma vectorstore from a list of documents
+vectorstore = Chroma.from_documents(docs, OpenAIEmbeddings()) # Create a Chroma vectorstore from a list of documents
 
 #%%
 from langchain.chains.query_constructor.base import AttributeInfo

@@ -15,13 +15,12 @@ user_rep = "When is Christmas"
 #ai_resp = 
 #model.invoke([HumanMessage(content=user_rep)])
 pprint("hi there")
+# The following are great examples of how to access value in dictionarys within dictionarys
 print(ai_resp.content) 
 print(ai_resp.response_metadata['token_usage'])   # completion, prompt and total tokens
 print(ai_resp.response_metadata['token_usage']['total_tokens']) # value of total
 
-
-
-#%%
+#%% - send human message to model which is OpenAI 
 model.invoke([HumanMessage(content="What's my name?")])
 # %%
 from langchain_core.messages import AIMessage

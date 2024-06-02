@@ -1,9 +1,11 @@
-#%%
+#%% - 
+
 from langchain_openai import ChatOpenAI
 os.environ["OPENAI_API_KEY"]
 model = ChatOpenAI(model="gpt-3.5-turbo")
 
-#%%
+#%% - this is leveraging a prompt template
+# -  Note that the template has 2 variables {name} and {user_input}
 from langchain_core.prompts import ChatPromptTemplate
 template = ChatPromptTemplate.from_messages([
     ("system", "You are a helpful AI bot. Your name is {name}."),
@@ -12,13 +14,14 @@ template = ChatPromptTemplate.from_messages([
     ("human", "{user_input}"),
 ])
 
+# The following includes values for the variable in the template above
 prompt_value = template.invoke(
     {
         "name": "Bob",
         "user_input": "What is your name?"
     }
 )
-# Output:
+# Output or value of prompt_value:
 # ChatPromptValue(
 #    messages=[
 #        SystemMessage(content='You are a helpful AI bot. Your name is Bob.'),
@@ -31,7 +34,7 @@ prompt_value = template.invoke(
 # In addition to Human/AI/Tool/Function messages,
 # you can initialize the template with a MessagesPlaceholder
 # either using the class directly or with the shorthand tuple syntax:
-
+#%%
 template = ChatPromptTemplate.from_messages([
     ("system", "You are a helpful AI bot."),
     # Means the template will receive an optional list of messages under
@@ -64,12 +67,10 @@ prompt_value = template.invoke(
 #)
 
 from langchain_core.prompts import ChatPromptTemplate
-
 template = ChatPromptTemplate.from_messages([
     ("system", "You are a helpful AI bot. Your name is Carl."),
     ("human", "{user_input}"),
 ])
-
 prompt_value = template.invoke("Hello, there!")
 # Equivalent to
 # prompt_value = template.invoke({"user_input": "Hello, there!"})
