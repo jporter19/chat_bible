@@ -2,14 +2,15 @@
 #%%  - these are the importers 
 import streamlit as st  # Streamlit is a package used for simple websites
 import chromadb         # Chroma Db is an open source vector database
-from langchain_chroma import Chroma
+from langchain_chroma.vectorstores import Chroma
 from pprint import pprint  # pprint is a bit better than print
 from chromadb.config import Settings
-from chromadb.utils import embedding_functions
+from tqdm.autonotebook import tqdm, trange
+from langchain_community.embeddings.sentence_transformer import (SentenceTransformerEmbeddings,)
+embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 import re    # re is regular expressions for pattern matching
 #default_ef = embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-
-default_ef = embedding_functions.DefaultEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+#default_ef = embedding_functions.DefaultEmbeddingFunction(model_name="all-MiniLM-L6-v2")
 
 
 #%% - this is a path to the primary database, each database can have multiple collections
@@ -26,14 +27,11 @@ def my_collections(db):
     return collections
 
 #%%
-db_client = Chroma()
-collection = Chroma(collection_name="IPCC",  embedding_function=embedding_function, persist_directory=dbpath,)
-chroma_client = chromadb.PersistentClient(path=dbpath)  # open a persistent database
-st.session_state.col_choice = st.sidebar.selectbox("Pick a Collection",my_collections(chroma_client))
+run_client = chromadb.PersistentClient(path=dbpath)
+st.session_state.col_choice = st.sidebar.selectbox("Pick a Collection",my_collections(run_client))
 if st.session_state.col_choice:
-    collection = chroma_client.get_collection(st.session_state.col_choice) # st.write(col_choice)
+    db= Chroma(persist_directory=dbpath,collection_name=st.session_state.col_choice,embedding_function=embedding_function)
 resp_cnt = st.sidebar.slider(min_value=1,max_value=10,label="Set the Number of Response")
-langchain_chroma = Chroma(client=chroma_client,collection_name=st.session_state.col_choice,embedding_function=default_ef,)
 # st.write(lc_client._collection.count())
 # chroma_collection = chroma_db.get_collection(col_nm)  # Create a collection
 # pprint(chroma_db.list_collections()) # print all collections in database
@@ -69,7 +67,7 @@ with tab1:
         if prompt: # if prompt has data then run this
             ##%%
             st.write(prompt)
-            res = langchain_chroma.similarity_search(prompt)
+            res = db.similarity_search(prompt)
             st.write(res)
            # res = chroma_collection.query(query_texts=prompt, 
            #     n_results=18,
